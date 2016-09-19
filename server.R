@@ -54,7 +54,7 @@ shinyServer(function(input, output,session) {
     plot(graph1e, main = network.name, layout=layout.kamada.kawai)
     # plot(graph1e, main = "layout.fruchterman.reingold", layout=layout.fruchterman.reingold)
   }
-  distill.cog <- function(dtm1, s, k1, network.name){
+  distill.cog <- function(dtm1, s, k1, network.name,cex,cex2){
     # s = 5  # no. of seed nodes
     # k1 = 7   # max no. of connections
     # n1 = 100 # restrict to the top n1 words
@@ -81,12 +81,18 @@ shinyServer(function(input, output,session) {
     mat3 = mat2[match(wc, colnames(mat2)), match(wc, colnames(mat2))]
     ord = colnames(mat2)[which(!is.na(match(colnames(mat2), colnames(mat3))))]  # removed any NAs from the list
     mat4 = mat3[match(ord, colnames(mat3)), match(ord, colnames(mat3))]
+    
     graph <- graph.adjacency(mat4, mode = "undirected", weighted=T)    # Create Network object
     graph = simplify(graph)  
     
-    V(graph)$color[1:s] = "gray"
-    V(graph)$color[s+1:length(V(graph))] = adjustcolor("white", alpha.f = 0.7)
-    plot(graph, vertex.label.cex = 1.1, main = network.name, layout=layout.kamada.kawai)
+    V(graph)$color[1:s] = "darkgoldenrod2"
+    V(graph)$color[s+1:length(V(graph))] = adjustcolor("cyan3", alpha.f = 0.7)
+    plot(graph,
+         vertex.label.cex = cex, 
+         vertex.label.color='black',		#the color of the name labels
+         vertex.size = cex2,     # size of the vertex
+         main = network.name, 
+         layout=layout.kamada.kawai)
   } # func ends
   #---------------------------------------------
   
@@ -102,9 +108,61 @@ shinyServer(function(input, output,session) {
   #---------------------------------------------  
     dtm = reactive({
       
+      stp_word1 = stopwords('english')
+      stp_word2 = readLines("data/stopwords.txt")
+      comn  = unique(c(stp_word1, stp_word2))
+      stp_word = unique(c(gsub("'","",comn),comn))
+      sto = unique(c(stp_word)) #,unlist(strsplit(input$stopw,","))
+      
       text = text.clean1(Dataset()[,2])
-      t = Corpus(VectorSource(text))
-      tdm = TermDocumentMatrix(t) 
+      myCorpus = tm_map(Corpus(VectorSource(text)), removeWords,c(sto))
+      # myCorpus = tm_map(myCorpus, stripWhitespace)   # removes white space
+      # myCorpus = as.character(unlist(myCorpus))
+      # x1 = myCorpus
+      # 
+      # ngram <- function(x1) NGramTokenizer(x1, Weka_control(min = 2, max = 2))  
+      # 
+      # tdm0 <- TermDocumentMatrix(x1, control = list(tokenize = ngram,
+      #                                               tolower = TRUE, 
+      #                                               removePunctuation = TRUE,
+      #                                               removeNumbers = TRUE,
+      #                                               stopwords = TRUE ))
+      # tdm = tdm0; rm('tdm0')
+      # a1 = apply(tdm, 1, sum)  
+      # a2 = ((a1 > 3))
+      # tdm.new = tdm[a2, ]
+      # rm('a1','a2','tdm')
+      # 
+      # dim(tdm.new)    # reduced tdm
+      # x1mat = t(tdm.new)    # don't do tfidf, not mentioned anywhere for topic modeling.
+      # dim(x1mat);    # store[i1, 5] = ncol(x2mat);
+      # 
+      # test = colnames(x1mat); 
+      # test1 = gsub(" ",".", test);  # replace spaces with dots
+      # colnames(x1mat) = test1
+      # 
+      # a11 = apply(x1mat, 2, sum)
+      # a12 = order(a11, decreasing = T)
+      # a13 = as.matrix(a11[a12])
+      # 
+      # #x1 = tm_map(x1, stripWhitespace)
+      # x1 = unlist(lapply(x1, content)) 
+      # for (i in 1:nrow(a13)){    
+      #   focal.term = gsub("\\.", " ", rownames(a13)[i])
+      #   replacement.term = gsub(" ", "-", focal.term)
+      #   replacement.term=paste("",replacement.term,"")
+      #   x1 = gsub(focal.term, replacement.term, x1)  
+      #   
+      # }	# now, our x corpus has the top 400 bigrams encoded as unigrams
+      
+      # progress$set(message = 'TDM creation in progress',
+      #              detail = 'This may take a while...')
+      # progress$set(value = 4)
+
+      # x1 = Corpus(VectorSource(x1))    # Constructs a source for a vector as input
+      tdm = TermDocumentMatrix(myCorpus)
+      
+      #tdm = TermDocumentMatrix(t) 
       
       Brands_DTM <- t(as.matrix(tdm))
       
@@ -148,10 +206,10 @@ shinyServer(function(input, output,session) {
   plot.one.mode(t(dtm2()), "Term-Term",input$cutoff,input$cex,input$cex2)
   })
   output$graph3 <- renderPlot({
-  distill.cog(dtm(), input$nodes, input$connection, "Doc-Doc")
+  distill.cog(dtm(), input$nodes, input$connection, "Doc-Doc",input$cex,input$cex2)
   })
   output$graph4 <- renderPlot({
-  distill.cog(t(dtm()),input$nodes, input$connection, "Term-Term")
+  distill.cog(t(dtm()),input$nodes, input$connection, "Term-Term",input$cex,input$cex2)
   })
     
   })
