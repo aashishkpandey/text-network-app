@@ -23,6 +23,9 @@ shinyUI(pageWithSidebar(
     
     numericInput("npoint", "Number of max Nodes in graph", 50),
     sliderInput("cutoff", "Threshold for connection in graph", 0,1,.95),
+    sliderInput("cex", "Data point labels font size", min = 0.1,  max = 3, value = 1,round = FALSE),
+    sliderInput("cex2", "Vertex Size", min = 0.1,  max = 20, value = 5,round = FALSE),
+    
     
     numericInput("nodes", "Number of Central Nodes in COG graph", 4),
     numericInput("connection", "Number of Max Connection with Central Node in COG graph", 5),

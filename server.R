@@ -20,7 +20,7 @@ shinyServer(function(input, output,session) {
     return(x)
   }
   
-  plot.one.mode <- function(mat, network.name, cutoff){
+  plot.one.mode <- function(mat, network.name, cutoff,cex,cex2){
     
     mat.network = mat %*% t(mat)
     
@@ -42,8 +42,8 @@ shinyServer(function(input, output,session) {
     # Set vertex attributes
     V(graph1e)$label = V(graph1e)$name
     V(graph1e)$label.color = rgb(0,0,.2,.8)
-    V(graph1e)$label.cex = .6
-    V(graph1e)$size = 6
+    V(graph1e)$label.cex = cex
+    V(graph1e)$size = cex2
     V(graph1e)$frame.color = NA
     V(graph1e)$color = rgb(0,0,1,.5)
     
@@ -51,7 +51,7 @@ shinyServer(function(input, output,session) {
     egam = (log(E(graph1e)$weight)+.3)/max(log(E(graph1e)$weight)+.3)
     E(graph1e)$color = rgb(.5,.5,0,egam)
     
-    plot(graph1e, vertex.label.cex = 1.1, main = network.name, layout=layout.kamada.kawai)
+    plot(graph1e, main = network.name, layout=layout.kamada.kawai)
     # plot(graph1e, main = "layout.fruchterman.reingold", layout=layout.fruchterman.reingold)
   }
   distill.cog <- function(dtm1, s, k1, network.name){
@@ -142,10 +142,10 @@ shinyServer(function(input, output,session) {
     })
     #-------------------------------------------
   output$graph1 <- renderPlot({
-  plot.one.mode(dtm1(), "Doc-Doc", input$cutoff)
+  plot.one.mode(dtm1(), "Doc-Doc", input$cutoff,input$cex,input$cex2)
   })
   output$graph2 <- renderPlot({
-  plot.one.mode(t(dtm2()), "Term-Term",input$cutoff)
+  plot.one.mode(t(dtm2()), "Term-Term",input$cutoff,input$cex,input$cex2)
   })
   output$graph3 <- renderPlot({
   distill.cog(dtm(), input$nodes, input$connection, "Doc-Doc")
