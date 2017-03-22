@@ -4,6 +4,7 @@
 
 library("shiny")
 library("igraph")
+library("tm")
 #library("foreign")
 
 shinyUI(pageWithSidebar(

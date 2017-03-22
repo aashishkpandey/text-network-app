@@ -3,7 +3,7 @@
 #################################################
 
 shinyServer(function(input, output,session) {
-  
+  library("shiny")
   library("igraph")
   library("tm")  
   #---------------------------------------------
@@ -200,16 +200,27 @@ shinyServer(function(input, output,session) {
     })
     #-------------------------------------------
   output$graph1 <- renderPlot({
+    if (is.null(input$file)) { return(NULL) }
+    else{
   plot.one.mode(dtm1(), "Doc-Doc", input$cutoff,input$cex,input$cex2)
+    }
   })
   output$graph2 <- renderPlot({
+    if (is.null(input$file)) { return(NULL) }
+    else{
   plot.one.mode(t(dtm2()), "Term-Term",input$cutoff,input$cex,input$cex2)
+    }
   })
   output$graph3 <- renderPlot({
+    if (is.null(input$file)) { return(NULL) }
+    else{
   distill.cog(dtm(), input$nodes, input$connection, "Doc-Doc",input$cex,input$cex2)
+    }
   })
-  output$graph4 <- renderPlot({
+  output$graph4 <- renderPlot({     if (is.null(input$file)) { return(NULL) }
+    else{
   distill.cog(t(dtm()),input$nodes, input$connection, "Term-Term",input$cex,input$cex2)
+    }
   })
     
   })
